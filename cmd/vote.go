@@ -8,6 +8,16 @@ import (
 )
 
 func main() {
+	//Test de Condorcet
+	prof2 := procedures.Profile{
+		{2, 1, 7, 8},
+		{1, 2, 7, 8},
+		{7, 2, 8, 1},
+		{8, 2, 7, 1},
+	}
+	fmt.Println("Gagnant de Condorcet")
+	fmt.Println(procedures.CondorcetWinner(prof2))
+
 	alt := []procedures.Alternative{4, 3, 5, 7, 1}
 	m := make(procedures.Count, 4)
 	m[1] = 6
