@@ -65,7 +65,7 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 
 	rsa.profile = append(rsa.profile, req.Prefs)
 
-	if rsa.reqCount < 100 {
+	if rsa.reqCount < 100 { // à changer pour mettre une deadline time
 		fmt.Println("not enough votes yet")
 		return
 	}
