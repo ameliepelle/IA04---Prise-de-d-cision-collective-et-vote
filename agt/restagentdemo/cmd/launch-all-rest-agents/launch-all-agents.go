@@ -13,7 +13,7 @@ func main() {
 	const n = 100
 	const url1 = ":8080"
 	const url2 = "http://localhost:8080"
-	ops := [...]string{"borda", "majority", "approval"} // mettre les méthodes de vote à la place
+	ops := [...]string{"borda", "majority", "approval", "condorcet"} // Il faut gérer le cas nul avec Condorcet
 
 	clAgts := make([]restclientagent.RestClientAgent, 0, n)
 	servAgt := restserveragent.NewRestServerAgent(url1)
@@ -24,7 +24,7 @@ func main() {
 	log.Println("démarrage des clients...")
 	for i := 0; i < n; i++ {
 		id := fmt.Sprintf("id%02d", i)
-		op := ops[0] //ops[rand.Intn(3)] // Il faut la fixer du coup j'imagine plutôt
+		op := ops[3] //ops[rand.Intn(3)] // Il faut la fixer du coup j'imagine plutôt
 		prefsInt := rand.Perm(16)
 		prefs := make([]procedures.Alternative, 16)
 		for j, pref := range prefsInt {
