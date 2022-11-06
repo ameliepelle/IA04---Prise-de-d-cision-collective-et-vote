@@ -98,6 +98,18 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		resp.Result = int(result[0])
+	case "condorcet":
+		var result []procedures.Alternative
+		result, err = procedures.CondorcetWinner(rsa.profile)
+		if err != nil {
+			fmt.Fprint(w, err.Error())
+			return
+		}
+		if result == nil {
+			fmt.Fprint(w, "Pas de gagnant de Condorcet")
+			return
+		}
+		resp.Result = int(result[0])
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 		msg := fmt.Sprintf("Unkonwn command '%s'", req.Operator)
