@@ -1,8 +1,6 @@
 package procedures
 
 import (
-	"fmt"
-
 	"gitlab.utc.fr/lagruesy/ia04/utils"
 )
 
@@ -73,16 +71,13 @@ func DistRP(arr1 []Alternative, p Profile) (dist int, err error) {
 func Kemeny(p Profile) (bestAlt []Alternative, err error) {
 	var distMin int                           //on garde simplement la permutation avec la distance minimale
 	perm := utils.FirstPermutation(len(p[0])) //On liste toutes les permutations et on calcule la distance dessus
-	fmt.Println(perm)
 	//On crée l'équivalent en alternative de la permutation
 	//On initialise les variables
 	bestAlt = make([]Alternative, len(p[0]))
 	for j, i := range perm {
 		bestAlt[j] = p[0][i]
 	}
-	fmt.Println("bestAlt ", bestAlt)
 	distMin, err = DistRP(bestAlt, p)
-	fmt.Println("distMin", distMin)
 	if err != nil {
 		return
 	}
@@ -92,12 +87,9 @@ func Kemeny(p Profile) (bestAlt []Alternative, err error) {
 
 	for ok {
 		altTemp := make([]Alternative, len(p[0]))
-		fmt.Println("perm ", perm)
 		for j, i := range perm {
-			fmt.Println("p[0][i] ", p[0][i])
 			altTemp[j] = p[0][i]
 		}
-		fmt.Println("altTemp", altTemp)
 		distemp, err := DistRP(altTemp, p)
 		if err != nil {
 			return bestAlt, err
@@ -105,11 +97,9 @@ func Kemeny(p Profile) (bestAlt []Alternative, err error) {
 		if distemp < distMin {
 			distMin = distemp
 			copy(bestAlt, altTemp)
-			fmt.Println("bestAlt ", bestAlt)
 
 		}
 		perm, ok = utils.NextPermutation(perm)
 	}
-	fmt.Println("min ", distMin)
 	return bestAlt, err
 }

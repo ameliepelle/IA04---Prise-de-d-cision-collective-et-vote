@@ -110,6 +110,14 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		resp.Result = int(result[0])
+	case "kemeny":
+		var result []procedures.Alternative
+		result, err = procedures.Kemeny(rsa.profile)
+		if err != nil {
+			fmt.Fprint(w, err.Error())
+			return
+		}
+		resp.Result = int(result[0])
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 		msg := fmt.Sprintf("Unkonwn command '%s'", req.Operator)
