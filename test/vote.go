@@ -41,7 +41,7 @@ func main() {
 		{8, 7, 2, 1},
 		{8, 7, 2, 1},
 	}
-	thre := []int{3, 3, 1, 1}
+	thre := []int{4, 3, 1, 1}
 
 	fmt.Println(procedures.ApprovalSCF(prof, thre))
 	alt3, err := procedures.ApprovalSCF(prof, thre)

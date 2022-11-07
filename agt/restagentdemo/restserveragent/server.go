@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"sync"
 	"time"
@@ -27,6 +26,7 @@ type RestServerAgent struct {
 	voters       []string
 	alreadyVoted []string
 	nbalts       int
+	thresholds   []int
 }
 
 func NewRestServerAgent(addr string) *RestServerAgent {
@@ -151,6 +151,8 @@ func (rsa *RestServerAgent) doAddVote(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	rsa.profile = append(rsa.profile, prefs)
+	options := req.Options[0]
+	rsa.thresholds = append(rsa.thresholds, options)
 
 	w.WriteHeader(http.StatusOK)
 
@@ -231,7 +233,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	case "approval":
 		var result []procedures.Alternative
 		log.Println("Profile :", rsa.profile)
-		result, err = procedures.ApprovalSCF(rsa.profile, rand.Perm(len(rsa.profile[0])))
+		result, err = procedures.ApprovalSCF(rsa.profile, rsa.thresholds)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
