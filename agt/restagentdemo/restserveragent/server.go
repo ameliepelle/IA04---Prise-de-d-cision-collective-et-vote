@@ -239,18 +239,18 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		/*intResult := make([]int, len(result))
-		for i, res := range result {
-			intResult[i] = int(res)
-		}
-		resp.Ranking = intResult
 		var result2 procedures.Count
-		result2, err = procedures.ApprovalSWF(rsa.profile, rand.Perm(len(rsa.profile[0])))
+		result2, err = procedures.ApprovalSWF(rsa.profile, rsa.thresholds)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Winner = result2[0]*/
+		result3 := procedures.Ranking(result2)
+		intResult := make([]int, len(result))
+		for i, res := range result3 {
+			intResult[i] = int(res)
+		}
+		resp.Ranking = intResult
 		resp.Winner = int(result[0])
 	case "condorcet":
 		var result []procedures.Alternative
