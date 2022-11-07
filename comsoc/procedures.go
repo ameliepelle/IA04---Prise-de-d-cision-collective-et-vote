@@ -45,6 +45,21 @@ func IsPref(alt1, alt2 Alternative, prefs []Alternative) bool { // renvoie vrai 
 // 	return indice1 < indice2
 // }
 
+func Ranking(count Count) (rankAlt []Alternative) {
+	rankAlt = make([]Alternative, 0, len(count))
+
+	for key := range count {
+		rankAlt = append(rankAlt, key)
+	}
+
+	sort.SliceStable(rankAlt, func(i, j int) bool {
+		return count[rankAlt[i]] < count[rankAlt[j]]
+	})
+
+	return rankAlt
+
+}
+
 func MaxCount(count Count) (bestAlts []Alternative) { // renvoie les meilleures alternatives pour un décomtpe donné
 	sortedAlts := make([]Alternative, len(count))
 	for key := range count {

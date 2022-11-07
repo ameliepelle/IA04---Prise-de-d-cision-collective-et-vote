@@ -195,19 +195,19 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		/*intResult := make([]int, len(result))
-		for i, res := range result {
-			intResult[i] = int(res)
-		}
-		resp.Ranking = intResult
 		var result2 procedures.Count
 		result2, err = procedures.BordaSWF(rsa.profile)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Winner = result2[0]*/
-		resp.Winner = int(result[0])
+		result3 := procedures.Ranking(result2)
+		intResult := make([]int, len(result))
+		for i, res := range result3 {
+			intResult[i] = int(res)
+		}
+		resp.Ranking = intResult
+		resp.Winner = int(result[0]) //faire un tiebreak ici
 	case "majority":
 		var result []procedures.Alternative
 		log.Println("Profile :", rsa.profile)
@@ -216,17 +216,18 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		/*intResult := make([]int, len(result))
-		for i, res := range result {
-			intResult[i] = int(res)
-		}
-		resp.Ranking = intResult
 		var result2 procedures.Count
 		result2, err = procedures.MajoritySWF(rsa.profile)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
-		}*/
+		}
+		result3 := procedures.Ranking(result2)
+		intResult := make([]int, len(result))
+		for i, res := range result3 {
+			intResult[i] = int(res)
+		}
+		resp.Ranking = intResult
 		resp.Winner = int(result[0])
 	case "approval":
 		var result []procedures.Alternative
@@ -271,6 +272,11 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
+		intResult := make([]int, len(result))
+		for i, res := range result {
+			intResult[i] = int(res)
+		}
+		resp.Ranking = intResult
 		resp.Winner = int(result[0])
 	default:
 		w.WriteHeader(http.StatusNotImplemented)

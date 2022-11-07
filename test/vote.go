@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 
 	procedures "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/comsoc"
 
@@ -9,6 +10,23 @@ import (
 )
 
 func main() {
+	//Test ranking
+	m2 := make(procedures.Count, 4)
+	keys := make([]procedures.Alternative, 0, len(m2))
+	m2[1] = 6
+	m2[2] = 1
+	m2[3] = 5
+	m2[4] = 6
+	for key := range m2 {
+		keys = append(keys, key)
+	}
+
+	sort.SliceStable(keys, func(i, j int) bool {
+		return m2[keys[i]] < m2[keys[j]]
+	})
+
+	fmt.Println("keys !", keys)
+
 	//Test Kemeny
 	prof2 := procedures.Profile{
 		{1, 2, 3},
