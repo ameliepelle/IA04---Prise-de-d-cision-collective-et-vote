@@ -48,3 +48,23 @@ func TieBreakFactory(ordre []Alternative) func(alts []Alternative) (alt Alternat
 
 //la fonction TieBreakFactory prend en argument un tri un ordre ex : [5, 3, 2, 1] le n°5 gagne en cas de tiebreak puis 3 etc
 //puis la fonction renvoie une fonction qui fait le tiebreak en fonction de l'ordre indiqué
+
+func SWFFactory(sfw func(p Profile) (Count, error), f func([]Alternative) (alt Alternative, err error)) func(Profile) ([]Alternative, error) {
+	return func(p2 Profile) (alternatives []Alternative, err error) {
+		count, err := sfw(p2)
+		//on va chercher les meilleurs alternatives
+		for {
+			best := MaxCount(count)
+			alt, err2 := f(best)
+			fmt.Println(err2.Error())
+			alternatives = append(alternatives, alt)
+			delete(count, alt)
+			if count == nil {
+				break
+			}
+		}
+		return alternatives, err
+
+	}
+
+}
