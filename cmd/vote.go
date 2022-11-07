@@ -8,6 +8,19 @@ import (
 )
 
 func main() {
+	//Test Kemeny
+	prof2 := procedures.Profile{
+		{1, 2, 3},
+		{3, 2, 1},
+		{1, 3, 2},
+	}
+	fmt.Println("vainqueur Kemeny ")
+	fmt.Println(procedures.Kemeny(prof2))
+
+	arr1 := []procedures.Alternative{1, 2, 3}
+	arr2 := []procedures.Alternative{1, 2, 3}
+	fmt.Println(procedures.TauKendall(arr1, arr2))
+
 	alt := []procedures.Alternative{4, 3, 5, 7, 1}
 	m := make(procedures.Count, 4)
 	m[1] = 6

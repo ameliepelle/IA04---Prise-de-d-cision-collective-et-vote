@@ -14,7 +14,7 @@ func main() {
 	const n = 100
 	const url1 = ":8080"
 	const url2 = "http://localhost:8080"
-	ops := [...]string{"borda", "majority", "approval"} // mettre les méthodes de vote à la place
+	ops := [...]string{"borda", "majority", "approval", "condorcet", "kemeny"} // Il faut gérer le cas nul avec Condorcet
 
 	clAgts := make([]restclientagent.RestClientAgent, 0, n)
 	servAgt := restserveragent.NewRestServerAgent(url1)
