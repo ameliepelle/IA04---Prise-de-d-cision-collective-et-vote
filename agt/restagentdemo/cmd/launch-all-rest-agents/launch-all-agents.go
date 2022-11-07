@@ -25,8 +25,8 @@ func main() {
 	log.Println("démarrage des clients...")
 	for i := 0; i < n; i++ {
 		id := fmt.Sprintf("id%02d", i)
-		prefsInt := rand.Perm(16)
-		prefs := make([]procedures.Alternative, 16)
+		prefsInt := rand.Perm(3)
+		prefs := make([]procedures.Alternative, 3)
 		for j, pref := range prefsInt {
 			prefs[j] = procedures.Alternative(pref)
 		}
@@ -34,7 +34,7 @@ func main() {
 		agt := restclientagent.NewRestClientAgent(id, "vote0", url2, prefs, options) // mettre prefs a la place de op1 op2
 		clAgts = append(clAgts, *agt)
 	}
-	op := ops[0]
+	op := ops[4]
 	deadline := time.Now().Add(3 * time.Second)
 	ballot := restclientagent.NewBallotAgent("vote0", op, deadline, []string{"id01", "id02", "id03", "id05"}, 3, url2)
 	ballot.Start()
@@ -50,6 +50,5 @@ func main() {
 	time.Sleep((time.Until(ballot.Deadline)))
 	fmt.Println("slept")
 	ballot.Result()
-
 	fmt.Scanln()
 }

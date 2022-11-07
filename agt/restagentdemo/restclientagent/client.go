@@ -53,7 +53,6 @@ func (b *BallotAgent) treatResultResponse(r *http.Response) int {
 
 	var resp rad.ResultResponse
 	json.Unmarshal(buf.Bytes(), &resp)
-
 	return resp.Winner
 }
 
@@ -71,7 +70,6 @@ func (b *BallotAgent) doBallotRequest() (res string, err error) {
 
 	// envoi de la requête
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
-
 	// traitement de la réponse
 	if err != nil {
 		return
@@ -124,20 +122,20 @@ func (b *BallotAgent) doResultRequest() (res int, err error) {
 	// sérialisation de la requête
 	url := b.url + "/result"
 	data, _ := json.Marshal(req)
-
 	// envoi de la requête
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
-
 	// traitement de la réponse
 	if err != nil {
+		log.Fatal("error:", err.Error())
 		return
 	}
-	if resp.StatusCode != http.StatusCreated {
-		err = fmt.Errorf("[%d] %s", resp.StatusCode, resp.Status)
+	log.Println("status code", resp.StatusCode)
+	log.Println("status created", http.StatusOK)
+	err = fmt.Errorf("[%d] %s", resp.StatusCode, resp.Status)
+	if resp.StatusCode != http.StatusOK {
 		return
 	}
 	res = b.treatResultResponse(resp)
-
 	return
 }
 
@@ -170,11 +168,10 @@ func (b *BallotAgent) Start() {
 
 func (b *BallotAgent) Result() {
 	res, err := b.doResultRequest()
-
-	if err != nil {
+	if err.Error() != "[200] 200 OK" {
 		log.Fatal("error:", err.Error())
 		return
 	}
 
-	log.Printf("gagnant : %d", res)
+	log.Println("gagnant :", res)
 }

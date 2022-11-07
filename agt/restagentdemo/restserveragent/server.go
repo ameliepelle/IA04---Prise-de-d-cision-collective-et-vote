@@ -163,7 +163,6 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	if !rsa.checkMethod("POST", w, r) {
 		return
 	}
-
 	// décodage de la requête
 	req, err := rsa.decodeResultRequest(r)
 	if err != nil {
@@ -171,7 +170,6 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err.Error())
 		return
 	}
-
 	if req.BallotId != rsa.id {
 		if req.BallotId > rsa.id {
 			w.WriteHeader(http.StatusTooEarly)
@@ -187,16 +185,16 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	}
 	// traitement de la requête
 	var resp rad.ResultResponse
-
 	switch rsa.operator {
 	case "borda": // case borda etc
 		var result []procedures.Alternative
+		log.Println("Profile :", rsa.profile)
 		result, err = procedures.BordaSCF(rsa.profile)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		intResult := make([]int, len(result))
+		/*intResult := make([]int, len(result))
 		for i, res := range result {
 			intResult[i] = int(res)
 		}
@@ -207,15 +205,17 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Winner = result2[1]
+		resp.Winner = result2[1]*/
+		resp.Winner = int(result[0])
 	case "majority":
 		var result []procedures.Alternative
+		log.Println("Profile :", rsa.profile)
 		result, err = procedures.MajoritySCF(rsa.profile)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		intResult := make([]int, len(result))
+		/*intResult := make([]int, len(result))
 		for i, res := range result {
 			intResult[i] = int(res)
 		}
@@ -225,16 +225,17 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
-		}
-		resp.Winner = result2[1]
+		}*/
+		resp.Winner = int(result[0])
 	case "approval":
 		var result []procedures.Alternative
+		log.Println("Profile :", rsa.profile)
 		result, err = procedures.ApprovalSCF(rsa.profile, rand.Perm(len(rsa.profile[0])))
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		intResult := make([]int, len(result))
+		/*intResult := make([]int, len(result))
 		for i, res := range result {
 			intResult[i] = int(res)
 		}
@@ -245,21 +246,25 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Winner = result2[1]
+		resp.Winner = result2[1]*/
+		resp.Winner = int(result[0])
 	case "condorcet":
 		var result []procedures.Alternative
+		log.Println("Profile :", rsa.profile)
 		result, err = procedures.CondorcetWinner(rsa.profile)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
 		}
 		if result == nil {
-			fmt.Fprint(w, "Pas de gagnant de Condorcet")
+			log.Println(w, "Pas de gagnant de Condorcet")
+			resp.Winner = -1
 			return
 		}
 		resp.Winner = int(result[0])
 	case "kemeny":
 		var result []procedures.Alternative
+		log.Println("Profile :", rsa.profile)
 		result, err = procedures.Kemeny(rsa.profile)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
