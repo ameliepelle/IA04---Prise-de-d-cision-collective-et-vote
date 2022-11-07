@@ -15,7 +15,7 @@ go run github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/re
 
 ### Méthodes de votes :
 * Borda
-* MajoritéSimple
+* Majorité Simple
 * Approval
 * Condorcet
 * Kemeny
@@ -26,4 +26,4 @@ go run github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/re
 * /result
 
 ### Autres :
-* Fonction de tiebreak et tiebreakFactory
+* Fonction de tiebreak et tiebreakFactory (utilisée dans le calcul de vote du serveur), SWFFactory

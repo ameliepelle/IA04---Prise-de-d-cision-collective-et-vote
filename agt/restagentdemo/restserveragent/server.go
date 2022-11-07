@@ -189,7 +189,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 	// traitement de la requête
 	var resp rad.ResultResponse
 	switch rsa.operator {
-	case "borda": // case borda etc
+	case "borda":
 		var result []procedures.Alternative
 		log.Println("Profile :", rsa.profile)
 		result, err = procedures.BordaSCF(rsa.profile)

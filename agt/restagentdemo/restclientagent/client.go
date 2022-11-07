@@ -13,8 +13,7 @@ import (
 	rad "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/restagentdemo"
 )
 
-// votant
-// operator a mettre dans le serveur au lieu du client
+// ballot
 type BallotAgent struct {
 	id       string
 	Rule     string
@@ -28,6 +27,7 @@ func NewBallotAgent(id string, rule string, deadline time.Time, voterIds []strin
 	return &BallotAgent{id, rule, deadline, voterIds, nbr, url}
 }
 
+// votant
 type RestClientAgent struct {
 	id      string
 	voteId  string

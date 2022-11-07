@@ -36,8 +36,6 @@ func TauKendall(arr1 []Alternative, arr2 []Alternative) (tau int, err error) {
 		}
 	}
 
-	//fmt.Println(pref1)
-	//fmt.Println(pref2)
 	for _, e := range pref1 {
 		for _, f := range pref2 {
 			if e[0] == f[1] && e[1] == f[0] { // si les paires sont inversées
@@ -47,7 +45,6 @@ func TauKendall(arr1 []Alternative, arr2 []Alternative) (tau int, err error) {
 
 	}
 	return tau, err
-	//return (count - (len(pref1)-count))/len(pref1
 } //ok
 
 func DistRP(arr1 []Alternative, p Profile) (dist int, err error) {

@@ -17,6 +17,8 @@ func TieBreak(alternatives []Alternative) (alt Alternative, err error) {
 	return
 }
 
+// la fonction TieBreakFactory prend en argument un tri un ordre ex : [5, 3, 2, 1] le n°5 gagne en cas de tiebreak puis 3 etc
+// puis la fonction renvoie une fonction qui fait le tiebreak en fonction de l'ordre indiqué
 func TieBreakFactory(ordre []Alternative) func(alts []Alternative) (alt Alternative, err error) {
 	return func(alts []Alternative) (alt Alternative, err error) {
 		err = errors.New("slice vide")
@@ -45,9 +47,6 @@ func TieBreakFactory(ordre []Alternative) func(alts []Alternative) (alt Alternat
 	}
 
 }
-
-//la fonction TieBreakFactory prend en argument un tri un ordre ex : [5, 3, 2, 1] le n°5 gagne en cas de tiebreak puis 3 etc
-//puis la fonction renvoie une fonction qui fait le tiebreak en fonction de l'ordre indiqué
 
 func SWFFactory(sfw func(p Profile) (Count, error), f func([]Alternative) (alt Alternative, err error)) func(Profile) ([]Alternative, error) {
 	return func(p2 Profile) (alternatives []Alternative, err error) {

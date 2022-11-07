@@ -2,7 +2,6 @@ package procedures
 
 import (
 	"errors"
-	"fmt"
 )
 
 func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
@@ -14,7 +13,6 @@ func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
 	err = CheckProfile(p)
 
 	if err != nil {
-		fmt.Println("ici") // changer les erreurs voir laurine
 		return
 	}
 

@@ -8,11 +8,8 @@ func CondorcetWinner(p Profile) (bestAlts []Alternative, err error) {
 		return
 	}
 
-	count := make(Count, len(p[0]))
-
 	//Créer une map pour compter le nombre de fois où chaque alternative gagne
-	//Si size(alt)==score(i) i est un gagnat de condorcet
-	//Utiliser la méthode IsPref
+	count := make(Count, len(p[0]))
 
 	//On parcours les alternatives 2 à 2
 	for i := range p[0] {
@@ -35,6 +32,7 @@ func CondorcetWinner(p Profile) (bestAlts []Alternative, err error) {
 
 	}
 	for k := range count {
+		//Si len(alt)==score(k) k est un gagnat de condorcet
 		if count[k] == len(p[0])-1 {
 			bestAlts = append(bestAlts, k)
 		}

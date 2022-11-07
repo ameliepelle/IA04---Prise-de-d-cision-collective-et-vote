@@ -32,19 +32,6 @@ func IsPref(alt1, alt2 Alternative, prefs []Alternative) bool { // renvoie vrai 
 	return indice1 < indice2
 }
 
-// func IsPref(alt1, alt2 Alternative, prefs []Alternative) bool { // renvoie vrai ssi alt1 est préférée à alt2
-// 	var indice1, indice2 int
-// 	for i, v := range prefs {
-// 		if v == alt1 {
-// 			indice1 = i
-// 		}
-// 		if v == alt2 {
-// 			indice2 = i
-// 		}
-// 	}
-// 	return indice1 < indice2
-// }
-
 func Ranking(count Count) (rankAlt []Alternative) {
 	rankAlt = make([]Alternative, 0, len(count))
 

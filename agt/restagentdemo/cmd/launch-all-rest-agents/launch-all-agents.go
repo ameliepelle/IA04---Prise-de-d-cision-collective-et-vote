@@ -12,10 +12,11 @@ import (
 )
 
 func main() {
-	const n = 100
+	const n = 100 // nombre de votants
+	const m = 5   // nombre d'alternatives
 	const url1 = ":8080"
 	const url2 = "http://localhost:8080"
-	ops := [...]string{"borda", "majority", "approval", "condorcet", "kemeny"} // Il faut gérer le cas nul avec Condorcet
+	ops := [...]string{"borda", "majority", "approval", "condorcet", "kemeny"} // méthodes de vote implémentées
 
 	clAgts := make([]restclientagent.RestClientAgent, 0, n)
 	servAgt := restserveragent.NewRestServerAgent(url1)
@@ -28,17 +29,17 @@ func main() {
 	for i := 0; i < n; i++ {
 		id := fmt.Sprintf("id%02d", i)
 		voters = append(voters, id)
-		prefsInt := rand.Perm(5)
-		prefs := make([]procedures.Alternative, 5)
-		for j, pref := range prefsInt {
+		prefsInt := rand.Perm(m) // preférences aléatoires
+		prefs := make([]procedures.Alternative, m)
+		for j, pref := range prefsInt { // conversion vers le type Alternative
 			prefs[j] = procedures.Alternative(pref)
 		}
-		agt := restclientagent.NewRestClientAgent(id, "vote0", url2, prefs, []int{rand.Intn(len(prefs))}) // mettre prefs a la place de op1 op2
+		agt := restclientagent.NewRestClientAgent(id, "vote0", url2, prefs, []int{rand.Intn(len(prefs))})
 		clAgts = append(clAgts, *agt)
 	}
-	op := ops[2]
-	deadline := time.Now().Add(3 * time.Second)
-	ballot := restclientagent.NewBallotAgent("vote0", op, deadline, voters, 5, url2)
+	op := ops[2]                                // changer l'indice pour sélectionner une méthode de vote différente
+	deadline := time.Now().Add(3 * time.Second) // deadline après 3 secondes (changer l'argument de Add() pour changer la deadline)
+	ballot := restclientagent.NewBallotAgent("vote0", op, deadline, voters, m, url2)
 	ballot.Start()
 
 	for _, agt := range clAgts {
@@ -49,8 +50,8 @@ func main() {
 		}(agt)
 	}
 
-	time.Sleep((time.Until(ballot.Deadline)))
-	fmt.Println("slept")
+	time.Sleep((time.Until(ballot.Deadline))) // attente de la deadline pour lancer le calcul du résultat de vote
+	fmt.Println("calcul du résultat ...")
 	ballot.Result()
 	fmt.Scanln()
 }
