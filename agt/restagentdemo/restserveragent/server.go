@@ -127,23 +127,27 @@ func (rsa *RestServerAgent) doAddVote(w http.ResponseWriter, r *http.Request) {
 			voterValid = true
 		}
 	}
-	if !voterValid || len(req.Prefs) != rsa.nbalts {
+	if !voterValid {
 		w.WriteHeader(http.StatusNotImplemented)
 		return
 	}
+
 	for _, voter := range rsa.alreadyVoted {
 		if voter == req.AgentId {
 			voted = true
 		}
 	}
-	if !voted {
+	if voted {
 		w.WriteHeader(http.StatusAlreadyReported)
-
+		voted = false
 		return
 	}
-	prefs := make([]procedures.Alternative, len(req.Prefs))
+
+	prefs := make([]procedures.Alternative, rsa.nbalts)
 	for i, pref := range req.Prefs {
-		prefs[i] = procedures.Alternative(pref)
+		if i < rsa.nbalts {
+			prefs[i] = procedures.Alternative(pref)
+		}
 	}
 	rsa.profile = append(rsa.profile, prefs)
 

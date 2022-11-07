@@ -35,8 +35,8 @@ func main() {
 		clAgts = append(clAgts, *agt)
 	}
 	op := ops[0]
-	deadline := time.Now().Add(30 * time.Second)
-	ballot := restclientagent.NewBallotAgent("vote0", op, deadline, []string{"id1", "id2", "id3", "id5"}, 3, url2)
+	deadline := time.Now().Add(3 * time.Second)
+	ballot := restclientagent.NewBallotAgent("vote0", op, deadline, []string{"id01", "id02", "id03", "id05"}, 3, url2)
 	ballot.Start()
 
 	for _, agt := range clAgts {
