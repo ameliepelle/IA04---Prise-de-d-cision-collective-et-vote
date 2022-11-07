@@ -16,15 +16,21 @@ import (
 // bureau de vote
 
 type RestServerAgent struct {
-	sync.Mutex // primitive de synchronisation utilisée en programmation informatique pour éviter que des ressources partagées d'un système ne soient utilisées en même temps.
-	id         string
-	reqCount   int
-	addr       string
-	profile    procedures.Profile
+	sync.Mutex   // primitive de synchronisation utilisée en programmation informatique pour éviter que des ressources partagées d'un système ne soient utilisées en même temps.
+	id           string
+	ballotCount  int
+	addr         string
+	deadline     time.Time
+	operator     string
+	profile      procedures.Profile
+	voters       []string
+	alreadyVoted []string
+	nbalts       int
 }
 
 func NewRestServerAgent(addr string) *RestServerAgent {
-	return &RestServerAgent{id: addr, addr: addr}
+	ballot := make(procedures.Profile, 0)
+	return &RestServerAgent{addr: addr, profile: ballot}
 }
 
 // Test de la méthode
@@ -37,18 +43,30 @@ func (rsa *RestServerAgent) checkMethod(method string, w http.ResponseWriter, r 
 	return true
 }
 
-func (*RestServerAgent) decodeRequest(r *http.Request) (req rad.Request, err error) {
+func (*RestServerAgent) decodeBallotRequest(r *http.Request) (req rad.BallotRequest, err error) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r.Body)
+	err = json.Unmarshal(buf.Bytes(), &req)
+	return
+}
+func (*RestServerAgent) decodeVoteRequest(r *http.Request) (req rad.VoteRequest, err error) {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r.Body)
+	err = json.Unmarshal(buf.Bytes(), &req)
+	return
+}
+func (*RestServerAgent) decodeResultRequest(r *http.Request) (req rad.ResultRequest, err error) {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 	err = json.Unmarshal(buf.Bytes(), &req)
 	return
 }
 
-func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
+func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) {
 	// mise à jour du nombre de requêtes
 	rsa.Lock()
 	defer rsa.Unlock()
-	rsa.reqCount++
+	rsa.ballotCount++
 
 	// vérification de la méthode de la requête
 	if !rsa.checkMethod("POST", w, r) {
@@ -56,24 +74,112 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// décodage de la requête
-	req, err := rsa.decodeRequest(r)
+	req, err := rsa.decodeBallotRequest(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
 	}
 
-	rsa.profile = append(rsa.profile, req.Prefs)
+	rsa.deadline = req.Deadline
+	rsa.operator = req.Rule
+	rsa.voters = req.VoterIds
+	rsa.id = "vote" + string(rune(rsa.ballotCount))
+	rsa.nbalts = req.NbrAlts
 
-	if rsa.reqCount < 100 { // à changer pour mettre une deadline time
-		fmt.Println("not enough votes yet")
+	if rsa.deadline != time.Now() && rsa.operator != "" && rsa.voters != nil {
+		resp := rad.BallotResponse{BallotId: "vote" + string(rune(rsa.ballotCount))}
+		w.WriteHeader(http.StatusCreated)
+		serial, _ := json.Marshal(resp)
+		w.Write(serial)
+	}
+	w.WriteHeader(http.StatusNotImplemented)
+	fmt.Fprint(w, err.Error())
+}
+
+func (rsa *RestServerAgent) doAddVote(w http.ResponseWriter, r *http.Request) {
+	rsa.Lock()
+	defer rsa.Unlock()
+
+	// vérification de la méthode de la requête
+	if !rsa.checkMethod("POST", w, r) {
 		return
 	}
 
-	// traitement de la requête
-	var resp rad.Response
+	// décodage de la requête
+	req, err := rsa.decodeVoteRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err.Error())
+		return
+	}
 
-	switch req.Operator {
+
+	voted := false
+	voterValid := false
+	for _, voter := range rsa.voters {
+		if voter == req.AgentId {
+			voterValid = true
+		}
+	}
+	if !voterValid || len(req.Prefs) != rsa.nbalts {
+		w.WriteHeader(http.StatusNotImplemented)
+		return
+	}
+	for _, voter := range rsa.alreadyVoted {
+		if voter == req.AgentId {
+			voted = true
+		}
+	}
+	if !voted {
+		w.WriteHeader(http.StatusAlreadyReported)
+
+		return
+	}
+	prefs := make([]procedures.Alternative, len(req.Prefs))
+	for i, pref := range req.Prefs {
+		prefs[i] = procedures.Alternative(pref)
+	}
+	rsa.profile = append(rsa.profile, prefs)
+	// if time.Now() < rsa.deadline { // à changer pour mettre une deadline time
+	// 	fmt.Println("not enough votes yet")
+	// 	return
+	// }
+
+	w.WriteHeader(http.StatusOK)
+	return
+
+}
+
+func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
+	rsa.Lock()
+	defer rsa.Unlock()
+
+	// vérification de la méthode de la requête
+	if !rsa.checkMethod("POST", w, r) {
+		return
+	}
+
+	// décodage de la requête
+	req, err := rsa.decodeResultRequest(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+
+	if req.BallotId != rsa.id {
+		if req.BallotId > rsa.id {
+			w.WriteHeader(http.StatusTooEarly)
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	// traitement de la requête
+	var resp rad.ResultResponse
+
+	switch rsa.operator {
 	case "borda": // case borda etc
 		var result []procedures.Alternative
 		result, err = procedures.BordaSCF(rsa.profile)
@@ -81,7 +187,18 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Result = int(result[0]) // comment faire pour récup un profil alors que chaque votant donne une liste d'alternatives?
+		intResult := make([]int, len(result))
+		for i, res := range result {
+			intResult[i] = int(res)
+		}
+		resp.Ranking = intResult
+		var result2 procedures.Count
+		result2, err = procedures.BordaSWF(rsa.profile)
+		if err != nil {
+			fmt.Fprint(w, err.Error())
+			return
+		}
+		resp.Winner = result2[1]
 	case "majority":
 		var result []procedures.Alternative
 		result, err = procedures.MajoritySCF(rsa.profile)
@@ -89,15 +206,37 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Result = int(result[0])
-	case "approval":
-		var result []procedures.Alternative
-		result, err = procedures.ApprovalSCF(rsa.profile, rand.Perm(100))
+		intResult := make([]int, len(result))
+		for i, res := range result {
+			intResult[i] = int(res)
+		}
+		resp.Ranking = intResult
+		var result2 procedures.Count
+		result2, err = procedures.MajoritySWF(rsa.profile)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Result = int(result[0])
+		resp.Winner = result2[1]
+	case "approval":
+		var result []procedures.Alternative
+		result, err = procedures.ApprovalSCF(rsa.profile, rand.Perm(len(rsa.profile[0])))
+		if err != nil {
+			fmt.Fprint(w, err.Error())
+			return
+		}
+		intResult := make([]int, len(result))
+		for i, res := range result {
+			intResult[i] = int(res)
+		}
+		resp.Ranking = intResult
+		var result2 procedures.Count
+		result2, err = procedures.ApprovalSWF(rsa.profile, rand.Perm(len(rsa.profile[0])))
+		if err != nil {
+			fmt.Fprint(w, err.Error())
+			return
+		}
+		resp.Winner = result2[1]
 	case "condorcet":
 		var result []procedures.Alternative
 		result, err = procedures.CondorcetWinner(rsa.profile)
@@ -109,7 +248,7 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "Pas de gagnant de Condorcet")
 			return
 		}
-		resp.Result = int(result[0])
+		resp.Winner = int(result[0])
 	case "kemeny":
 		var result []procedures.Alternative
 		result, err = procedures.Kemeny(rsa.profile)
@@ -117,10 +256,10 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Result = int(result[0])
+
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
-		msg := fmt.Sprintf("Unkonwn command '%s'", req.Operator)
+		msg := fmt.Sprintf("Unkonwn command '%s'", rsa.operator)
 		w.Write([]byte(msg))
 		return
 	}
@@ -130,7 +269,7 @@ func (rsa *RestServerAgent) doCalc(w http.ResponseWriter, r *http.Request) {
 	w.Write(serial)
 }
 
-func (rsa *RestServerAgent) doReqcount(w http.ResponseWriter, r *http.Request) {
+func (rsa *RestServerAgent) doBallotcount(w http.ResponseWriter, r *http.Request) {
 	if !rsa.checkMethod("GET", w, r) {
 		return
 	}
@@ -138,15 +277,17 @@ func (rsa *RestServerAgent) doReqcount(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	rsa.Lock()
 	defer rsa.Unlock()
-	serial, _ := json.Marshal(rsa.reqCount)
+	serial, _ := json.Marshal(rsa.ballotCount)
 	w.Write(serial)
 }
 
 func (rsa *RestServerAgent) Start() {
 	// création du multiplexer
 	mux := http.NewServeMux()
-	mux.HandleFunc("/calculator", rsa.doCalc)
-	mux.HandleFunc("/reqcount", rsa.doReqcount)
+	mux.HandleFunc("/new_ballot", rsa.doNewBallot)
+	mux.HandleFunc("/vote", rsa.doAddVote)
+	mux.HandleFunc("/result", rsa.doVote)
+	mux.HandleFunc("/reqcount", rsa.doBallotcount)
 
 	// création du serveur http
 	s := &http.Server{
