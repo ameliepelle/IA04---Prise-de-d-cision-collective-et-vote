@@ -20,7 +20,7 @@ func ApprovalSWF(p Profile, thresholds []int) (count Count, err error) {
 
 	for i, pref := range p {
 		for j, alt := range pref {
-			if j > thresholds[i] {
+			if j > thresholds[i]-1 {
 				continue
 			}
 			count[alt] += 1
