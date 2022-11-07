@@ -92,6 +92,7 @@ func (rsa *RestServerAgent) doNewBallot(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusCreated)
 		serial, _ := json.Marshal(resp)
 		w.Write(serial)
+		return
 	}
 	w.WriteHeader(http.StatusNotImplemented)
 	fmt.Fprint(w, err.Error())
@@ -146,7 +147,6 @@ func (rsa *RestServerAgent) doAddVote(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	w.WriteHeader(http.StatusOK)
-	return
 
 }
 
