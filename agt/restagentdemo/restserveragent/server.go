@@ -206,7 +206,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Winner = result2[1]*/
+		resp.Winner = result2[0]*/
 		resp.Winner = int(result[0])
 	case "majority":
 		var result []procedures.Alternative
@@ -247,7 +247,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-		resp.Winner = result2[1]*/
+		resp.Winner = result2[0]*/
 		resp.Winner = int(result[0])
 	case "condorcet":
 		var result []procedures.Alternative

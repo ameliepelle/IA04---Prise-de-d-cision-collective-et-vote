@@ -1,8 +1,9 @@
 package main
 
 import (
-	procedures "TD3/comsoc"
 	"fmt"
+
+	procedures "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/comsoc"
 
 	"gitlab.utc.fr/lagruesy/ia04/utils"
 )
