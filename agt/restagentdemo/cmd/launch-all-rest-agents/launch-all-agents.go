@@ -1,13 +1,14 @@
 package main
 
 import (
-	restclientagent "TD3/agt/restagentdemo/restclientagent"
-	restserveragent "TD3/agt/restagentdemo/restserveragent"
-	procedures "TD3/comsoc"
 	"fmt"
 	"log"
 	"math/rand"
 	"time"
+
+	restclientagent "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/restagentdemo/restclientagent"
+	restserveragent "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/restagentdemo/restserveragent"
+	procedures "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/comsoc"
 )
 
 func main() {
@@ -34,7 +35,7 @@ func main() {
 		agt := restclientagent.NewRestClientAgent(id, "vote0", url2, prefs, options) // mettre prefs a la place de op1 op2
 		clAgts = append(clAgts, *agt)
 	}
-	op := ops[4]
+	op := ops[1]
 	deadline := time.Now().Add(3 * time.Second)
 	ballot := restclientagent.NewBallotAgent("vote0", op, deadline, []string{"id01", "id02", "id03", "id05"}, 3, url2)
 	ballot.Start()

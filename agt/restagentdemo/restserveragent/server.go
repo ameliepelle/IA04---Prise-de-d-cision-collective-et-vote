@@ -1,8 +1,6 @@
 package restserveragent
 
 import (
-	rad "TD3/agt/restagentdemo"
-	procedures "TD3/comsoc"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -11,6 +9,9 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	rad "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/restagentdemo"
+	procedures "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/comsoc"
 )
 
 // bureau de vote

@@ -1,14 +1,16 @@
 package restclientagent
 
 import (
-	rad "TD3/agt/restagentdemo"
-	procedures "TD3/comsoc"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	procedures "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/comsoc"
+
+	rad "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/restagentdemo"
 )
 
 // votant

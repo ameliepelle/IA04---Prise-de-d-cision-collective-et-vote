@@ -1,4 +1,5 @@
-module TD3
+module github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote
+
 
 go 1.19
 

@@ -1,8 +1,9 @@
 package main
 
 import (
-	ras "TD3/agt/restagentdemo/restserveragent"
 	"fmt"
+
+	ras "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/restagentdemo/restserveragent"
 )
 
 func main() {

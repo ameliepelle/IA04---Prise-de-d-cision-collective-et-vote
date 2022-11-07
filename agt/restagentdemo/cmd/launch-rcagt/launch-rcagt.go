@@ -1,10 +1,11 @@
 package main
 
 import (
-	restclientagent "TD3/agt/restagentdemo/restclientagent"
-	procedures "TD3/comsoc"
 	"fmt"
 	"time"
+
+	restclientagent "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/agt/restagentdemo/restclientagent"
+	procedures "github.com/ameliepelle/IA04---Prise-de-d-cision-collective-et-vote/comsoc"
 )
 
 func main() {
