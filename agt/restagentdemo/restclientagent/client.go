@@ -8,40 +8,75 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 // votant
 // operator a mettre dans le serveur au lieu du client
+type BallotAgent struct {
+	id       string
+	Rule     string
+	Deadline time.Time
+	VoterIds []string
+	NbrAlts  int
+	url      string
+}
+
+func NewBallotAgent(id string, rule string, deadline time.Time, voterIds []string, nbr int, url string) *BallotAgent {
+	return &BallotAgent{id, rule, deadline, voterIds, nbr, url}
+}
 
 type RestClientAgent struct {
-	id       string
-	url      string
-	operator string
-	prefs    []procedures.Alternative
+	id      string
+	voteId  string
+	url     string
+	prefs   []procedures.Alternative
+	options []int
 }
 
-func NewRestClientAgent(id string, url string, op string, prefs []procedures.Alternative) *RestClientAgent {
-	return &RestClientAgent{id, url, op, prefs}
+func NewRestClientAgent(id string, vote string, url string, prefs []procedures.Alternative, opt []int) *RestClientAgent {
+	return &RestClientAgent{id, vote, url, prefs, opt}
 }
 
-func (rca *RestClientAgent) treatResponse(r *http.Response) int {
+// func (rca *RestClientAgent) treatResponse(r *http.Response) int {
+// 	buf := new(bytes.Buffer)
+// 	buf.ReadFrom(r.Body)
+
+// 	var resp rad.Response
+// 	json.Unmarshal(buf.Bytes(), &resp)
+
+// 	return resp.Result
+// }
+
+func (rca *BallotAgent) treatBallotResponse(r *http.Response) string {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
 
-	var resp rad.Response
+	var resp rad.BallotResponse
 	json.Unmarshal(buf.Bytes(), &resp)
 
-	return resp.Result
+	return resp.BallotId
+}
+func (b *BallotAgent) treatResultResponse(r *http.Response) int {
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(r.Body)
+
+	var resp rad.ResultResponse
+	json.Unmarshal(buf.Bytes(), &resp)
+
+	return resp.Winner
 }
 
-func (rca *RestClientAgent) doRequest() (res int, err error) {
-	req := rad.Request{
-		Operator: rca.operator,
-		Prefs:    rca.prefs,
+func (b *BallotAgent) doBallotRequest() (res string, err error) {
+	req := rad.BallotRequest{
+		Rule:     b.Rule,
+		Deadline: b.Deadline,
+		VoterIds: b.VoterIds,
+		NbrAlts:  b.NbrAlts,
 	}
 
 	// sérialisation de la requête
-	url := rca.url + "/calculator"
+	url := b.url + "/new_ballot"
 	data, _ := json.Marshal(req)
 
 	// envoi de la requête
@@ -51,22 +86,100 @@ func (rca *RestClientAgent) doRequest() (res int, err error) {
 	if err != nil {
 		return
 	}
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusCreated {
 		err = fmt.Errorf("[%d] %s", resp.StatusCode, resp.Status)
 		return
 	}
-	res = rca.treatResponse(resp)
+	res = b.treatBallotResponse(resp)
+
+	return
+}
+
+func (rca *RestClientAgent) doVoteRequest() (err error) {
+	alts := make([]int, len(rca.prefs))
+	for i, pref := range rca.prefs {
+		alts[i] = int(pref)
+	}
+	req := rad.VoteRequest{
+		AgentId: rca.id,
+		VoteId:  rca.voteId,
+		Prefs:   alts,
+		Options: rca.options,
+	}
+
+	// sérialisation de la requête
+	url := rca.url + "/vote"
+	data, _ := json.Marshal(req)
+
+	// envoi de la requête
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+
+	// traitement de la réponse
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != http.StatusCreated {
+		err = fmt.Errorf("[%d] %s", resp.StatusCode, resp.Status)
+		return
+	}
+
+	return
+}
+
+func (b *BallotAgent) doResultRequest() (res int, err error) {
+	req := rad.ResultRequest{
+		BallotId: b.id,
+	}
+
+	// sérialisation de la requête
+	url := b.url + "/result"
+	data, _ := json.Marshal(req)
+
+	// envoi de la requête
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
+
+	// traitement de la réponse
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != http.StatusCreated {
+		err = fmt.Errorf("[%d] %s", resp.StatusCode, resp.Status)
+		return
+	}
+	res = b.treatResultResponse(resp)
 
 	return
 }
 
 func (rca *RestClientAgent) Start() {
 	log.Printf("démarrage de %s", rca.id)
-	res, err := rca.doRequest()
+	rca.doVoteRequest()
+
+	log.Printf("[%s] %v \n", rca.id, rca.prefs)
+}
+
+func (rca *RestClientAgent) SetVoteId(voteId string) {
+	rca.voteId = voteId
+}
+
+func (b *BallotAgent) GetId() string {
+	return b.id
+}
+
+func (b *BallotAgent) Start() {
+	log.Printf("démarrage du ballot")
+
+	res, err := b.doBallotRequest()
 
 	if err != nil {
-		log.Fatal(rca.id, "error:", err.Error())
+		log.Fatal("error:", err.Error())
 	} else {
-		log.Printf("[%s] %v %s = %d\n", rca.id, rca.prefs, rca.operator, res)
+		b.id = res
+	}
+
+	result, err2 := b.doResultRequest()
+
+	if err2 == nil {
+		log.Printf("gagnant : %d", result)
 	}
 }

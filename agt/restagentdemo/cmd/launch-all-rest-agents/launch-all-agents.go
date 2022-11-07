@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"time"
 )
 
 func main() {
@@ -24,17 +25,22 @@ func main() {
 	log.Println("démarrage des clients...")
 	for i := 0; i < n; i++ {
 		id := fmt.Sprintf("id%02d", i)
-		op := ops[0] //ops[rand.Intn(3)] // Il faut la fixer du coup j'imagine plutôt
 		prefsInt := rand.Perm(16)
 		prefs := make([]procedures.Alternative, 16)
 		for j, pref := range prefsInt {
 			prefs[j] = procedures.Alternative(pref)
 		}
-		agt := restclientagent.NewRestClientAgent(id, url2, op, prefs) // mettre prefs a la place de op1 op2
+		options := rand.Perm(16)
+		agt := restclientagent.NewRestClientAgent(id, "vote0", url2, prefs, options) // mettre prefs a la place de op1 op2
 		clAgts = append(clAgts, *agt)
 	}
+	op := ops[0]
+	deadline := time.Date(2022, 11, 7, 11, 30, 0, 0, time.Now().Location())
+	ballot := restclientagent.NewBallotAgent("vote0", op, deadline, []string{"id1", "id2", "id3", "id5"}, 3, url1)
+	ballot.Start()
 
 	for _, agt := range clAgts {
+		agt.SetVoteId(ballot.GetId())
 		// attention, obligation de passer par cette lambda pour faire capturer la valeur de l'itération par la goroutine
 		func(agt restclientagent.RestClientAgent) {
 			go agt.Start()

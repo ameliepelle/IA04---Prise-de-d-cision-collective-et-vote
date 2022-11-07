@@ -4,10 +4,13 @@ import (
 	restclientagent "TD3/agt/restagentdemo/restclientagent"
 	procedures "TD3/comsoc"
 	"fmt"
+	"time"
 )
 
 func main() {
-	ag := restclientagent.NewRestClientAgent("id1", "http://localhost:8000", "borda", []procedures.Alternative{3, 5, 4, 8, 1}) // mettre borda par ex a la place de "+"
+	ag := restclientagent.NewRestClientAgent("id1", "vote0", "http://localhost:8000", []procedures.Alternative{3, 5, 4, 8, 1}, []int{0, 0, 0, 0, 0})
+	ballot := restclientagent.NewBallotAgent("vote0", "borda", time.Date(2022, 11, 7, 11, 30, 0, 0, time.Now().Location()), []string{"id1"}, 3, "http://localhost:3000")
+	ballot.Start()
 	ag.Start()
 	fmt.Scanln()
 }
