@@ -35,7 +35,7 @@ func main() {
 		clAgts = append(clAgts, *agt)
 	}
 	op := ops[0]
-	deadline := time.Date(2022, 11, 7, 11, 30, 0, 0, time.Now().Location())
+	deadline := time.Now().Add(30 * time.Second)
 	ballot := restclientagent.NewBallotAgent("vote0", op, deadline, []string{"id1", "id2", "id3", "id5"}, 3, url2)
 	ballot.Start()
 
@@ -46,6 +46,10 @@ func main() {
 			go agt.Start()
 		}(agt)
 	}
+
+	time.Sleep((time.Until(ballot.Deadline)))
+	fmt.Println("slept")
+	ballot.Result()
 
 	fmt.Scanln()
 }

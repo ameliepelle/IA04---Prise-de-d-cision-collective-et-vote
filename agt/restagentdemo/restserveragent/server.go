@@ -115,6 +115,11 @@ func (rsa *RestServerAgent) doAddVote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if time.Now().After(rsa.deadline) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	voted := false
 	voterValid := false
 	for _, voter := range rsa.voters {
@@ -141,10 +146,6 @@ func (rsa *RestServerAgent) doAddVote(w http.ResponseWriter, r *http.Request) {
 		prefs[i] = procedures.Alternative(pref)
 	}
 	rsa.profile = append(rsa.profile, prefs)
-	// if time.Now() < rsa.deadline { // à changer pour mettre une deadline time
-	// 	fmt.Println("not enough votes yet")
-	// 	return
-	// }
 
 	w.WriteHeader(http.StatusOK)
 
@@ -173,6 +174,11 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if time.Now().Before(rsa.deadline) {
+		w.WriteHeader(http.StatusTooEarly)
 		return
 	}
 	// traitement de la requête
