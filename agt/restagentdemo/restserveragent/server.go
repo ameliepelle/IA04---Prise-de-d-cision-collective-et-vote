@@ -114,7 +114,6 @@ func (rsa *RestServerAgent) doAddVote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	voted := false
 	voterValid := false
 	for _, voter := range rsa.voters {
@@ -256,7 +255,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
-
+		resp.Winner = int(result[0])
 	default:
 		w.WriteHeader(http.StatusNotImplemented)
 		msg := fmt.Sprintf("Unkonwn command '%s'", rsa.operator)
