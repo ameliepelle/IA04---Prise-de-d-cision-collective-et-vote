@@ -204,7 +204,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		result3 := procedures.Ranking(result2)
-		intResult := make([]int, len(result))
+		intResult := make([]int, len(result3))
 		for i, res := range result3 {
 			intResult[i] = int(res)
 		}
@@ -225,7 +225,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		result3 := procedures.Ranking(result2)
-		intResult := make([]int, len(result))
+		intResult := make([]int, len(result3))
 		for i, res := range result3 {
 			intResult[i] = int(res)
 		}
@@ -246,7 +246,7 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		result3 := procedures.Ranking(result2)
-		intResult := make([]int, len(result))
+		intResult := make([]int, len(result3))
 		for i, res := range result3 {
 			intResult[i] = int(res)
 		}
