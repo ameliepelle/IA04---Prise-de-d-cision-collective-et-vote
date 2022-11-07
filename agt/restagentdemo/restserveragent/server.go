@@ -203,13 +203,23 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, err.Error())
 			return
 		}
+
 		result3 := procedures.Ranking(result2)
 		intResult := make([]int, len(result3))
 		for i, res := range result3 {
 			intResult[i] = int(res)
 		}
 		resp.Ranking = intResult
-		resp.Winner = int(result[0]) //faire un tiebreak ici
+
+		// tie break
+		resp.Winner = int(result[0])
+		if len(result) > 1 {
+			f := procedures.TieBreakFactory(result3)
+			winner, erro := f(result)
+			if erro == nil {
+				resp.Winner = int(winner)
+			}
+		}
 	case "majority":
 		var result []procedures.Alternative
 		log.Println("Profile :", rsa.profile)
@@ -230,7 +240,17 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			intResult[i] = int(res)
 		}
 		resp.Ranking = intResult
+
+		// tie break
 		resp.Winner = int(result[0])
+		if len(result) > 1 {
+			f := procedures.TieBreakFactory(result3)
+			winner, erro := f(result)
+			if erro == nil {
+				resp.Winner = int(winner)
+			}
+		}
+
 	case "approval":
 		var result []procedures.Alternative
 		log.Println("Profile :", rsa.profile)
@@ -251,7 +271,16 @@ func (rsa *RestServerAgent) doVote(w http.ResponseWriter, r *http.Request) {
 			intResult[i] = int(res)
 		}
 		resp.Ranking = intResult
+		// tie break
 		resp.Winner = int(result[0])
+		if len(result) > 1 {
+			f := procedures.TieBreakFactory(result3)
+			winner, erro := f(result)
+			if erro == nil {
+				resp.Winner = int(winner)
+			}
+		}
+
 	case "condorcet":
 		var result []procedures.Alternative
 		log.Println("Profile :", rsa.profile)
