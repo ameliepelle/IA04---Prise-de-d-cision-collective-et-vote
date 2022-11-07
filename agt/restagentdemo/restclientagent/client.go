@@ -38,16 +38,6 @@ func NewRestClientAgent(id string, vote string, url string, prefs []procedures.A
 	return &RestClientAgent{id, vote, url, prefs, opt}
 }
 
-// func (rca *RestClientAgent) treatResponse(r *http.Response) int {
-// 	buf := new(bytes.Buffer)
-// 	buf.ReadFrom(r.Body)
-
-// 	var resp rad.Response
-// 	json.Unmarshal(buf.Bytes(), &resp)
-
-// 	return resp.Result
-// }
-
 func (rca *BallotAgent) treatBallotResponse(r *http.Response) string {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(r.Body)
@@ -176,10 +166,15 @@ func (b *BallotAgent) Start() {
 	} else {
 		b.id = res
 	}
+}
 
-	result, err2 := b.doResultRequest()
+func (b *BallotAgent) Result() {
+	res, err := b.doResultRequest()
 
-	if err2 == nil {
-		log.Printf("gagnant : %d", result)
+	if err != nil {
+		log.Fatal("error:", err.Error())
+		return
 	}
+
+	log.Printf("gagnant : %d", res)
 }
